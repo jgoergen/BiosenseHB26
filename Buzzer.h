@@ -6,7 +6,7 @@
 class Buzzer
 {
   public:    
-    Buzzer(int pin);
+    Buzzer();
     void mute();
     void unmute();
     void init();

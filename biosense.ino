@@ -1,45 +1,19 @@
-// read to learn more about electronics
-//     https://www.instructables.com/id/Muscle-EMG-Sensor-for-a-Microcontroller/
-//     https://www.instructables.com/id/DIY-EEG-and-ECG-Circuit/
-
-// good desktop app for sending data too
-//     http://www.shifz.org/brainbay/
-
-// TODO: Add zooming to the x axis of the data visualization
-//     scope inspiration https://github.com/laurb9/tiny_scope
-// TODO: Add sd card data logger for later use, also maybe file replaying?
-// TODO: Figure out pulse bpm   
-//    http://www.xtronical.com/basics/heart-beat-sensor-ecg-display/
-// TODO: Figure out ekg bpm     
-//    https://www.wikihow.com/Calculate-Heart-Rate-from-ECG
-//    https://courses.kcumb.edu/physio/ecg%20primer/normecgcalcs.htm
-//    https://imotions.com/blog/heart-rate-variability/
-// TODO: Figure out muscle contraction percentage or something more usefull then just the graph
-// TODO: Add some kind of sleep induction feature?    
-//    https://www.youtube.com/watch?v=u0SJtPKslgk&feature=youtu.be
-
-
-
-
 // includes
 #include <Filters.h>
 #include "Buzzer.h"
 #include "OledDisplay.h"
 #include "Input.h"
 
-// pin definitions
-#define BTN_1_PIN     2
-#define BTN_2_PIN     3
-#define BTN_3_PIN     4
-#define BTN_4_PIN     5
-#define BUZZER_PIN    12
-
 // component instantiation
-Buzzer buzzer(BUZZER_PIN);
+Buzzer buzzer;
 OledDisplay oledDisplay;
-Input input(BTN_1_PIN, BTN_2_PIN, BTN_3_PIN, BTN_4_PIN);
-FilterOnePole filterOneLowpass( LOWPASS, 10.0 ); // filter noise over 10 hertz
+Input input;
 
+// system variables
+int appMode = 0;
+int sensorMode = 0;
+
+// sensor polling and graphing variables
 float runningHighestAvg = 0.0f;
 float runningLowestAvg = 1025.0f;
 float runningAvg = 0.0f;
@@ -47,8 +21,6 @@ float height = 0.0f;
 float scale = 1; 
 float mappedVal = 0.0f;
 int x = 0; 
-int appMode = 0;
-int sensorMode = 0;
 int LastTime = 0;
 int ThisTime;
 bool BPMTiming = false;
@@ -87,7 +59,15 @@ void loop()
       break;
 
     case 1:
-      sensorPollingUpdate();
+      pulseUpdate();
+      break;
+
+    case 2:
+      ECGUpdate();
+      break;
+
+    case 3:
+      EEGUpdate();
       break;
   }
 
@@ -99,24 +79,30 @@ void changeAppMode(int mode) {
   switch(mode) {
 
     case 0: 
+
       mainMenuStart();
       break;
 
     case 1:
-      LastTime = 0;
-      ThisTime;
-      BPMTiming = false;
-      BeatComplete = false;
-      BPM = 0;
-      runningHighestAvg = 0.0f;
-      runningLowestAvg = 1025.0f;
-      runningAvg = 0.0f;
-      sensorPollingStart();
+       
+      pulseStart();
+      break;
+
+    case 2:
+    
+      ECGStart();
+      break;
+
+    case 3:
+      
+      EMGStart();
       break;
   }
 
   appMode = mode;
 }
+
+// ################## MAIN MENU ##################
 
 void mainMenuStart() {
 
@@ -149,19 +135,30 @@ void mainMenuUpdate() {
   }
 }
 
-void sensorPollingStart() {
+// ################## PULSE ##################
+
+void pulseStart() {
+
+  // reset all sensor / display variables
+  LastTime = 0;
+  ThisTime;
+  BPMTiming = false;
+  BeatComplete = false;
+  BPM = 0;
+  runningHighestAvg = 0.0f;
+  runningLowestAvg = 1025.0f;
+  runningAvg = 0.0f;
 
   buzzer.beep(200,600);
   buzzer.beep(300,200);
   buzzer.beep(400,300);
 
-  resetDataVisualization(sensorMode);
+  oledDisplay.print(1, 1, "PULSE");
 }
 
-void sensorPollingUpdate() {
+void pulseUpdate() {
 
-  //filterOneLowpass.input(input.getBioSensorData(sensorMode)); 
-  int bioData = input.getBioSensorData(sensorMode);//filterOneLowpass.output();
+  int bioData = input.getBioSensorData(sensorMode);
   //Serial.println(bioData);
   updateDataVisualization(sensorMode, bioData, 16, 2);       
   delay(5);
@@ -171,37 +168,52 @@ void sensorPollingUpdate() {
     changeAppMode(0);
 }
 
-void resetDataVisualization(int mode) {
+// ################## ECG ##################
 
-  oledDisplay.clear();  
+void ECGStart() {
 
-  // show mode title
-  switch(mode) {
+  buzzer.beep(200,600);
+  buzzer.beep(300,200);
+  buzzer.beep(400,300);
 
-    case 0: 
-      oledDisplay.print(1, 1, "PULSE");    
-      break;
-
-    case 1: 
-      oledDisplay.print(1, 1, "ECG/EEG");  
-      break;
-
-    case 2: 
-      oledDisplay.print(1, 1, "EMG");  
-      break;
-  }
-
-  //runningHighestAvg = 0.0f;
-  //runningLowestAvg = 1025.0f;
-  //runningAvg = 0.0f;
-  x = 0;
+  oledDisplay.print(1, 1, "ECG");
 }
-   
+
+void ECGUpdate() {
+
+  // if 4th button is held down, exit display
+  if (input.getButtonPress(4))
+  changeAppMode(0);
+}
+
+// ################## EEG ##################
+
+void EMGStart() {
+  
+  buzzer.beep(200,600);
+  buzzer.beep(300,200);
+  buzzer.beep(400,300);
+
+  oledDisplay.print(1, 1, "EMG");
+}
+
+void EMGUpdate() {
+  
+}
+
+
+
+
+
+
 void updateDataVisualization(int mode, int value, int topPadding, int bottomPadding) {
 
   // reset bounds and redraw text info
-  if (x > 128)    
-    resetDataVisualization(mode);
+  if (x > 128) {
+
+    oledDisplay.clear();  
+    x = 0;
+  }
 
   runningAvg = (runningAvg + value) / 2;  
   

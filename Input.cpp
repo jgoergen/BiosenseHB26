@@ -1,25 +1,25 @@
 #include "Arduino.h"
 #include "Input.h"
 
-static int _button_pin_1;
-static int _button_pin_2;
-static int _button_pin_3;
-static int _button_pin_4;
+// pin definitions
+#define BTN_1_PIN     2
+#define BTN_2_PIN     3
+#define BTN_3_PIN     4
+#define BTN_4_PIN     5
  
-Input::Input(int button_pin_1, int button_pin_2, int button_pin_3, int button_pin_4) {
+// only using one filter for all three kinds of data because I don't plan to pull more then one in a session.
+FilterOnePole filterOneLowpass( LOWPASS, 10.0 );
+
+Input::Input() {
    
-  _button_pin_1 = button_pin_1;
-  _button_pin_2 = button_pin_2;
-  _button_pin_3 = button_pin_3;
-  _button_pin_4 = button_pin_4;
 }
  
 void Input::init() {
    
-  pinMode(_button_pin_1, INPUT_PULLUP);
-  pinMode(_button_pin_2, INPUT_PULLUP);
-  pinMode(_button_pin_3, INPUT_PULLUP);
-  pinMode(_button_pin_4, INPUT_PULLUP);
+  pinMode(BTN_1_PIN, INPUT_PULLUP);
+  pinMode(BTN_2_PIN, INPUT_PULLUP);
+  pinMode(BTN_3_PIN, INPUT_PULLUP);
+  pinMode(BTN_4_PIN, INPUT_PULLUP);
 }
 
 bool Input::getButtonPress(int which) {
@@ -27,24 +27,37 @@ bool Input::getButtonPress(int which) {
   switch(which) {
     
     case 1:
-      return digitalRead(_button_pin_1) == LOW;
+      return digitalRead(BTN_1_PIN) == LOW;
       break;
       
     case 2:
-      return digitalRead(_button_pin_2) == LOW;
+      return digitalRead(BTN_2_PIN) == LOW;
       break;
       
     case 3:
-      return digitalRead(_button_pin_3) == LOW;
+      return digitalRead(BTN_3_PIN) == LOW;
       break;
       
     case 4:
-      return digitalRead(_button_pin_4) == LOW;
+      return digitalRead(BTN_4_PIN) == LOW;
       break;
   }
 }
  
-int Input::getBioSensorData(int which) {
+int Input::getPulseData() { 
 
-  return analogRead(which); // emg - A2, ecg/eeg - A1, pulse - A0
+  filterOneLowpass.input(analogRead(0)); 
+  return filterOneLowpass.output(); 
+}
+
+int Input::getECGData(int which) {
+
+  filterOneLowpass.input(analogRead(1)); 
+  return filterOneLowpass.output(); 
+}
+
+int Input::getEMGData(int which) {
+
+  filterOneLowpass.input(analogRead(2)); 
+  return filterOneLowpass.output(); 
 }

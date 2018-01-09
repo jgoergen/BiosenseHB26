@@ -1,17 +1,17 @@
 #include "Arduino.h"
 #include "Buzzer.h"
- 
-static int _pin;
+
+#define BUZZER_PIN    12
+
 static bool _muted = false;
  
-Buzzer::Buzzer(int pin) {
+Buzzer::Buzzer() {
    
-  _pin = pin;
 }
  
 void Buzzer::init() {
    
-  pinMode(_pin, OUTPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
 }
 
 void Buzzer::mute() {
