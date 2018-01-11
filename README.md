@@ -8,11 +8,11 @@ An opensource firmware for the Hackerbox #0026 Biosense Kit!
 | Done! | Remove Game from example firmware. |
 | Done! | Change display library to adafruit version. |
 | Done! | Break firmware into multiple classes. |
-| 50% | Filter signal better before relaying to host or graphing. |
+| 80% | Filter signal better before relaying to host or graphing. |
 | 0% | Add external SD Card Module support. |
-| 0% | Improve on device graphing. |
-| 0% | Add on device configuration. |
-| 60% | Correlate pulse data to BPM on device. |
+| 50% | Improve on device graphing. |
+| 0% | Add on device configuration via menus. |
+| 50% | Correlate pulse data to BPM on device. |
 | 0% | Correlate EKC metrics on device. |
 | 0% | Correlate EMG muscle contraction percentage on device. |
 
@@ -20,6 +20,7 @@ An opensource firmware for the Hackerbox #0026 Biosense Kit!
 ###Deeper notes on some of the TODOs:
 ####Filter signal better before relaying to host or graphing.
 - I'm currently playing with running averaging and low pass filtering, is there a better way?
+- My averaging attempts to be self adjusting over time, although it may be too aggressive. I need to find a better balance for it.
 ####Add external SD Card Module support.
 - I'm guessing we would need to not only log the data but also millisecond markers for correlation? Maybe just a symbol every second or something similar?
 - The ability to replay files as if the data was coming from the device naturally would be cool for interacting with external hosts
