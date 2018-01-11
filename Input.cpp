@@ -1,5 +1,6 @@
 #include "Arduino.h"
 #include "Input.h"
+#include <Filters.h>
 
 // pin definitions
 #define BTN_1_PIN     2
@@ -8,7 +9,7 @@
 #define BTN_4_PIN     5
  
 // only using one filter for all three kinds of data because I don't plan to pull more then one in a session.
-FilterOnePole filterOneLowpass( LOWPASS, 10.0 );
+FilterOnePole filterOneLowpass( LOWPASS, 5.0 );
 
 Input::Input() {
    
@@ -50,13 +51,13 @@ int Input::getPulseData() {
   return filterOneLowpass.output(); 
 }
 
-int Input::getECGData(int which) {
+int Input::getECGData() {
 
   filterOneLowpass.input(analogRead(1)); 
   return filterOneLowpass.output(); 
 }
 
-int Input::getEMGData(int which) {
+int Input::getEMGData() {
 
   filterOneLowpass.input(analogRead(2)); 
   return filterOneLowpass.output(); 
