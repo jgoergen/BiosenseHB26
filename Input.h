@@ -9,15 +9,12 @@ class Input
     Input();
     void init();
     bool getButtonPress(int which);
-    int getPulseData();
-    int getECGData();
-    int getEMGData();
+    int getPulseData(bool filtered);
+    int getECGData(bool filtered);
+    int getEMGData(bool filtered);
      
   private:
-    int _button_pin_1;
-    int _button_pin_2;
-    int _button_pin_3;
-    int _button_pin_4;
+    int reading;
 };
  
 #endif

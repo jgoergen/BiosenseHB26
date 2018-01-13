@@ -12,23 +12,31 @@ Input input;
 int appMode = 0;
 int sensorMode = 0;
 
-// sensor polling and graphing variables
+// averaging and graphing variables
 float highestValueAverage = 0.0f;
 float lowestValueAverage = 1025.0f;
+float framesSinceLastLowest = 0;
+float framesSinceLastHighest = 0;
 float valueAverage = 0.0f;
-float height = 0.0f;
 float scale = 1; 
 float mappedVal = 0.0f;
 int x = 0; 
+int graphHeight = 0;
+int lastX = 0;
+int lastY = 0;
+
+// pulse variables
 int LastTime = 0;
 int ThisTime;
 bool BPMTiming = false;
 bool BeatComplete = false;
-int averageBPM = 0;
 int BPM = 0;
+int newBPM = 0;
+float topLimit = 0.0f;
+float bottomLimit = 0.0f;
+int timesBPMWasClose = 0;
+
 char outputBuffer[55]; 
-float framesSinceLastLowest = 0;
-float framesSinceLastHighest = 0;
 
 void setup()
 {
@@ -60,7 +68,7 @@ void loop()
       break;
 
     case 1:
-      pulseUpdate();
+      EMGUpdate();
       break;
 
     case 2:
@@ -68,7 +76,7 @@ void loop()
       break;
 
     case 3:
-      EMGUpdate();
+      pulseUpdate();
       break;
   }
 
@@ -77,30 +85,26 @@ void loop()
 
 void changeAppMode(int mode) {
 
+  appMode = mode;
+
   switch(mode) {
 
     case 0: 
-
       mainMenuStart();
       break;
 
     case 1:
-      
       EMGStart();
       break;
 
     case 2:
-    
       ECGStart();
       break;
 
     case 3:
-       
       pulseStart();
       break;
   }
-
-  appMode = mode;
 }
 
 // ################## MAIN MENU ##################
@@ -131,6 +135,8 @@ void mainMenuUpdate() {
     
     changeAppMode(3);
   }
+
+  delay(16);
 }
 
 // ################## PULSE ##################
@@ -146,6 +152,10 @@ void pulseStart() {
   highestValueAverage = 0.0f;
   lowestValueAverage = 1025.0f;
   valueAverage = 0.0f;
+  newBPM = 0;
+  topLimit = 0.0f;
+  bottomLimit = 0.0f;
+  timesBPMWasClose = 0;
 
   buzzer.beep(200,600);
   buzzer.beep(300,200);
@@ -158,36 +168,67 @@ void pulseStart() {
 void pulseUpdate() {
 
   // get data
-  int bioData = input.getPulseData();
+  int bioData = input.getPulseData(false);
 
   // computer averages
   computeAverageValues(bioData);
+
+  /*
+  Serial.print(highestValueAverage);
+  Serial.print(",");
+  Serial.print(lowestValueAverage);
+  Serial.print(",");
+  Serial.print(topLimit);
+  Serial.print(",");
+  Serial.print(bottomLimit);
+  Serial.print(",");
+  Serial.print(bioData);
+  Serial.print(",");
+  */
 
   // dump average value to serial
   Serial.println(valueAverage); 
 
   // display raw graph of average value
-  displayData(valueAverage, 20, 10);
+  displayData(bioData, 30, 10);
   
-  // actual pusle calculation  
-  float midLine = lowestValueAverage + ((highestValueAverage - lowestValueAverage) / 2);
+  // actual pusle calculation
+  // 
+  // The idea here is, when the pulse drops under 25% of the 'average bottom' it's half a Beat.
+  // When the pulse jumps above 75% of the 'average bottom' then it's a full beat.
+  // Once we have a full beat get the amount of time it took, then figure out how many of
+  // Those you could fit into a minute. Then you have 'beats per minute'. 
+  // It seems pretty weak, to be honest. But this appears to be what others are doing.
+  //
+  // I added some code that forces the bpm to be within '10' of the last 3 readings before it counts.
+  // This is supposed to be like a 'confidence' reading, and if it's too eratic, we don't even show it.
+
+  // calcular limits for beat watching
+  topLimit = lowestValueAverage + ((highestValueAverage - lowestValueAverage) * 0.75f);
+  bottomLimit = lowestValueAverage + ((highestValueAverage - lowestValueAverage) * 0.25f);
   ThisTime = millis();
-  
-  if (valueAverage > midLine) {
+
+  if (bioData > topLimit) {
 
     if (BeatComplete) {
 
-      BPM = int(60 / (float(ThisTime - LastTime) / 1000));
+      newBPM = int(60 / (float(ThisTime - LastTime) / 1000));
       BPMTiming = false;
       BeatComplete = false;
-      averageBPM = (averageBPM + BPM) / 2;
 
-      if (averageBPM > 30 && averageBPM < 200) {
+      if (abs(newBPM - BPM) < 10)
+        timesBPMWasClose ++;
+      else
+        timesBPMWasClose = 0;
+
+      BPM = newBPM;
+
+      if (timesBPMWasClose > 3 && BPM > 30 && BPM < 200) {
         
         buzzer.beep(12, 250);
   
         char bpmBuffer[5];
-        itoa(averageBPM, bpmBuffer, 10);
+        itoa(BPM, bpmBuffer, 10);
         sprintf(outputBuffer, "%s BPM", bpmBuffer);
   
         oledDisplay.eraseRect(60, 0, 128, 10);
@@ -202,19 +243,9 @@ void pulseUpdate() {
     }
   }
   
-  if ((valueAverage < midLine) & BPMTiming)
+  if ((bioData < bottomLimit) & BPMTiming)
     BeatComplete = true;
 
-  /*
-  Serial.print(highestValueAverage);
-  Serial.print(",");
-  Serial.print(lowestValueAverage);
-  Serial.print(",");
-  Serial.print(midLine);
-  Serial.print(",");
-  Serial.println(valueAverage);
-  */
-  
   // if 4th button is held down, exit display
   if (input.getButtonPress(4))
     changeAppMode(0);
@@ -237,25 +268,23 @@ void ECGStart() {
 
 void ECGUpdate() {
 
-  // get data
-  int bioData = input.getECGData();
+  // get data ( don't filter it )
+  int bioData = input.getECGData(false);
 
   // computer averages
   computeAverageValues(bioData);
 
-  // dump average value to serial
-  Serial.println(valueAverage); 
+  // dump raw value to serial
+  Serial.println(bioData); 
 
-  // display raw graph of average value
-  displayData(valueAverage, 20, 10);
+  // display graph of raw value
+  displayData(bioData, 20, 10);
 
   // actual heartrate calculation
 
   // if 4th button is held down, exit display
   if (input.getButtonPress(4))
   changeAppMode(0);
-
-  delay(5);
 }
 
 // ################## EMG ##################
@@ -275,17 +304,20 @@ void EMGStart() {
 
 void EMGUpdate() {
   
+  // filtering and averaging disabled here until it's better understood if they're a good use
+
   // get data
-  int bioData = input.getEMGData();
+  int bioData = input.getEMGData(false);
 
   // computer averages
   computeAverageValues(bioData);
 
   // dump average value to serial
-  Serial.println(valueAverage); 
+  Serial.println(bioData); 
 
   // display raw graph of average value
-  displayData(valueAverage, 20, 10);
+  //displayData(valueAverage, 20, 10);v
+  displayData(bioData, 20, 10);
 
   // actual muscle flex percentage calculation
 
@@ -296,7 +328,6 @@ void EMGUpdate() {
   //delay(5);
 }
 
-// TODO: This should probably be part of the input class as just properties. The get data functions would compute them when polled
 void computeAverageValues(int value) {
 
   valueAverage = (valueAverage + value) / 2.0f;  
@@ -309,7 +340,10 @@ void computeAverageValues(int value) {
   } else {
 
     framesSinceLastHighest ++;
-    highestValueAverage -= 0.15f;
+
+    //if it's been more then 20 frames since the last expansion, then contract some to keep the bounds correct.
+    if (framesSinceLastHighest > 20)
+      highestValueAverage -= 0.3f;
   }
   
   if (valueAverage < lowestValueAverage) {
@@ -320,7 +354,10 @@ void computeAverageValues(int value) {
   } else {
 
     framesSinceLastLowest ++;
-    lowestValueAverage += 0.08f;
+
+    //if it's been more then 20 frames since the last expansion, then contract some to keep the bounds correct.
+    if (framesSinceLastLowest > 20)
+      lowestValueAverage += 0.2f;
   }
 }
 
@@ -336,12 +373,21 @@ void displayData(int value, int topPadding, int bottomPadding) {
   // reset bounds and redraw text info
   if (x > 128) {
 
-    oledDisplay.clear();  
+    oledDisplay.eraseRect(0, 11, 128, 64);
     x = 0;
+    lastX = 0;
   }
   
-  int graphHeight = 64 - topPadding - bottomPadding;
+  graphHeight = 64 - topPadding - bottomPadding;
   mappedVal = (int)map(valueAverage, lowestValueAverage, highestValueAverage, 0, graphHeight);
-  oledDisplay.drawLine(x, (graphHeight / 2) + topPadding, x, topPadding + (mappedVal - (graphHeight / 2))+ (graphHeight / 2) - 1);
+
+  oledDisplay.drawLine(
+    lastX, 
+    lastY, 
+    x, 
+    topPadding + (mappedVal - (graphHeight / 2)) + (graphHeight / 2) - 1);
+
+  lastX = x;
+  lastY = topPadding + (mappedVal - (graphHeight / 2)) + (graphHeight / 2) - 1;
   x ++;  
 }

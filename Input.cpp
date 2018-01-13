@@ -1,6 +1,6 @@
 #include "Arduino.h"
 #include "Input.h"
-#include <Filters.h>
+#include "Filters.h"
 
 // pin definitions
 #define BTN_1_PIN     2
@@ -10,6 +10,7 @@
  
 // only using one filter for all three kinds of data because I don't plan to pull more then one in a session.
 FilterOnePole filterOneLowpass( LOWPASS, 5.0 );
+int reading = 0;
 
 Input::Input() {
    
@@ -45,20 +46,35 @@ bool Input::getButtonPress(int which) {
   }
 }
  
-int Input::getPulseData() { 
+int Input::getPulseData(bool filtered) { 
 
-  filterOneLowpass.input(analogRead(0)); 
-  return filterOneLowpass.output(); 
+  reading = analogRead(0);
+  filterOneLowpass.input(reading); 
+
+  if (filtered)
+    return filterOneLowpass.output(); 
+  else
+    return reading;
 }
 
-int Input::getECGData() {
+int Input::getECGData(bool filtered) {
 
-  filterOneLowpass.input(analogRead(1)); 
-  return filterOneLowpass.output(); 
+  reading = analogRead(1);
+  filterOneLowpass.input(reading); 
+  
+  if (filtered)
+    return filterOneLowpass.output(); 
+  else
+    return reading; 
 }
 
-int Input::getEMGData() {
+int Input::getEMGData(bool filtered) {
 
-  filterOneLowpass.input(analogRead(2)); 
-  return filterOneLowpass.output(); 
+  reading = analogRead(2);
+  filterOneLowpass.input(reading); 
+  
+  if (filtered)
+    return filterOneLowpass.output(); 
+  else
+    return reading;
 }
