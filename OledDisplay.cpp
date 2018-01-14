@@ -32,13 +32,25 @@ void OledDisplay::print(int x, int y, char message[]) {
   oled.setTextSize(1);
   oled.println(message);
 }
+void OledDisplay::print(int x, int y, String message) {
+
+  oled.setCursor(x, y);
+  oled.setTextSize(1);
+  oled.println(message);
+}
 
 void OledDisplay::printLarge(int x, int y, char message[]) {
-
   oled.setCursor(x, y);
   oled.setTextSize(2);
   oled.println(message);
 }
+
+void OledDisplay::printLarge(int x, int y, String message) {
+  oled.setCursor(x, y);
+  oled.setTextSize(2);
+  oled.println(message);
+}
+
 
 void OledDisplay::drawLine(int x1, int y1, int x2, int y2) {
 

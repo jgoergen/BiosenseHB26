@@ -1,31 +1,26 @@
 #include "Arduino.h"
 #include "Buzzer.h"
 
-#define BUZZER_PIN    12
 
 static bool _muted = false;
  
 Buzzer::Buzzer() {
-   
 }
  
-void Buzzer::init() {
-   
-  pinMode(BUZZER_PIN, OUTPUT);
+void Buzzer::init(int bPin) {
+   _pin = bPin;
+  pinMode(_pin, OUTPUT);
 }
 
 void Buzzer::mute() {
-   
   _muted = true;
 }
 
 void Buzzer::unmute() {
-   
   _muted = false;
 }
  
 void Buzzer::beep(int bCount,int bDelay) {
-
   if (_muted)
     return;
   
