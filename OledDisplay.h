@@ -13,7 +13,9 @@ class OledDisplay
     void init();
     void clear();
     void print(int x, int y, char message[]);
+    void print(int x, int y, String message);// accept strings
     void printLarge(int x, int y, char message[]);
+    void printLarge(int x, int y, String message); // accept strings
     void drawPixel(int x, int y);
     void erasePixel(int x, int y);
     void drawLine(int x1, int y1, int x2, int y2);

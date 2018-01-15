@@ -9,7 +9,7 @@ class Buzzer
     Buzzer();
     void mute();
     void unmute();
-    void init();
+    void init(int bPin);
     void beep(int bCount,int bDelay);
      
   private:
