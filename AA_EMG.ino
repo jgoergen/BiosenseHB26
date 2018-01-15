@@ -1,16 +1,20 @@
 // ################## EMG ##################
 
 void EMGStart() {
-   modeName = "EMG";
+
+  modeName = "EMG";
+
+  // reset values
   highestValueAverage = 0.0f;
   lowestValueAverage = 1025.0f;
   valueAverage = 0.0f;
-  
+
   buzzer.beep(200,600);
   buzzer.beep(300,200);
   buzzer.beep(400,300);
-  
-  oledDisplay.clear(); // clear menu before displaying next thing
+
+  // clear menu before displaying next thing
+  oledDisplay.clear(); 
   oledDisplay.print(1, 1, modeName);
   oledDisplay.display();
 }
@@ -19,14 +23,16 @@ void EMGUpdate() {
   
   // filtering and averaging disabled here until it's better understood if they're a good use
 
-  int bioData = input.getEMGData(false);  // get data
-  computeAverageValues(bioData);  // computer averages
+  // get data ( don't filter it )
+  int bioData = input.getEMGData(false);  
 
-  // dump average value to serial
+  // computer averages
+  computeAverageValues(bioData);  
+
+  // dump raw value to serial
   Serial.println(bioData); 
 
   // display raw graph of average value
-  //displayData(valueAverage, 20, 10);v
   displayData(bioData, 20, 10);
 
   // actual muscle flex percentage calculation
@@ -35,7 +41,7 @@ void EMGUpdate() {
   if (input.getButtonPress(4))
     changeAppMode(0);
 
-  //delay(5);
+  delay(5);
 }
 
 

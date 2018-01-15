@@ -1,37 +1,44 @@
 // ################## ECG ##################
 
 void ECGStart() {
-   modeName = "ECG";
-  highestValueAverage = 0.0f;
-  lowestValueAverage = 1025.0f;
-  valueAverage = 0.0f;
 
-  buzzer.beep(200,600);
-  buzzer.beep(300,200);
-  buzzer.beep(400,300);
-  oledDisplay.clear(); // clear menu before displaying next thing
-  oledDisplay.print(1, 1, modeName);
-  oledDisplay.display();
+    modeName = "ECG";
+    
+    // reset values
+    highestValueAverage = 0.0f;
+    lowestValueAverage = 1025.0f;
+    valueAverage = 0.0f;
+
+    buzzer.beep(200,600);
+    buzzer.beep(300,200);
+    buzzer.beep(400,300);
+
+    // clear menu before displaying next thing
+    oledDisplay.clear(); 
+    oledDisplay.print(1, 1, modeName);
+    oledDisplay.display();
 }
 
 
 void ECGUpdate() {
 
-  
-  int bioData = input.getECGData(false); // get data ( don't filter it )
+    // filtering and averaging disabled here until it's better understood if they're a good use
 
-  // computer averages
-  computeAverageValues(bioData);
+    // get data ( don't filter it )
+    int bioData = input.getECGData(false); 
 
-  // dump raw value to serial
-  Serial.println(bioData); 
+    // computer averages
+    computeAverageValues(bioData);
 
-  // display graph of raw value
-  displayData(bioData, 20, 10);
+    // dump raw value to serial
+    Serial.println(bioData); 
 
-  // actual heartrate calculation
+    // display graph of raw value
+    displayData(bioData, 20, 10);
 
-  // if 4th button is held down, exit display
-  if (input.getButtonPress(4))
-  changeAppMode(0);
+    // actual heartrate calculation
+
+    // if 4th button is held down, exit display
+    if (input.getButtonPress(4))
+        changeAppMode(0);
 }
