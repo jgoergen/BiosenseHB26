@@ -34,13 +34,14 @@ An opensource firmware for the Hackerbox #0026 Biosense Kit!
 - EKG Data: https://imotions.com/blog/heart-rate-variability/
 
 
-##Additional information:
+## Additional information:
 ### Learn more about electronics
 - https://www.instructables.com/id/Muscle-EMG-Sensor-for-a-Microcontroller/
 - https://www.instructables.com/id/DIY-EEG-and-ECG-Circuit/
 
 ### good desktop app for recieving usb serial data from device?
 - http://www.shifz.org/brainbay/
+
 
 ## FAQ:
 "It says I'm missing filters.h when compiling, am I missing a library?" Yep! You can find it here: https://github.com/JonHub/Filters 
