@@ -5,8 +5,10 @@
 
 // you need this library to use code: https://github.com/JonHub/Filters
 
+#define BUZZER_PIN 12
+
 // component instantiation
-Buzzer buzzer;
+Buzzer buzzer(BUZZER_PIN);
 OledDisplay oledDisplay;
 Input input;
 

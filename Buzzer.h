@@ -6,7 +6,7 @@
 class Buzzer
 {
   public:    
-    Buzzer();
+    Buzzer(int _pin);
     void mute();
     void unmute();
     void init();
@@ -14,6 +14,7 @@ class Buzzer
       
   private:
     bool _muted;
+    int _pin;
 };
 
 #endif

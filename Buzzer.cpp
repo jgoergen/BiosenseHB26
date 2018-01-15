@@ -1,16 +1,18 @@
 #include "Arduino.h"
 #include "Buzzer.h"
 
-#define BUZZER_PIN 12
 
 static bool _muted = false;
+static int _pin = false;
 
-Buzzer::Buzzer() {
+Buzzer::Buzzer(int pin) {
+
+    _pin = pin;
 }
 
 void Buzzer::init() {
 
-    pinMode(BUZZER_PIN, OUTPUT);
+    pinMode(_pin, OUTPUT);
 }
 
 void Buzzer::mute() {
@@ -30,7 +32,7 @@ void Buzzer::beep(int bCount,int bDelay) {
 
     for (int i = 0; i <= bCount * 2; i++) {
 
-        digitalWrite(BUZZER_PIN, i&1);
+        digitalWrite(_pin, i&1);
 
         for(int i2 = 0; i2 < bDelay; i2++) {
 
@@ -49,5 +51,5 @@ void Buzzer::beep(int bCount,int bDelay) {
         }
     }
 
-    digitalWrite(BUZZER_PIN, LOW);
+    digitalWrite(_pin, LOW);
 }
