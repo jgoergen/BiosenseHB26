@@ -2,5 +2,5 @@
     "board": "arduino:avr:nano",
     "configuration": "cpu=atmega328",
     "sketch": "biosense.ino",
-    "port": "COM6"
+    "port": "COM10"
 }

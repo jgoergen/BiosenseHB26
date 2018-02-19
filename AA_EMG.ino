@@ -33,7 +33,7 @@ void EMGUpdate() {
   Serial.println(bioData); 
 
   // display raw graph of average value
-  displayData(bioData, 20, 10);
+  displayData(bioData, 10, 0);
 
   // actual muscle flex percentage calculation
 

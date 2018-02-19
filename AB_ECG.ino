@@ -34,11 +34,13 @@ void ECGUpdate() {
     Serial.println(bioData); 
 
     // display graph of raw value
-    displayData(bioData, 20, 10);
+    displayData(bioData, 10, 0);
 
     // actual heartrate calculation
 
     // if 4th button is held down, exit display
     if (input.getButtonPress(4))
         changeAppMode(0);
+
+    delay(5);
 }

@@ -48,7 +48,7 @@ bool Input::getButtonPress(int which) {
 
 int Input::getPulseData(bool filtered) { 
 
-    reading = analogRead(0);
+    reading = analogRead(A0);
     filterOneLowpass.input(reading); 
 
     if (filtered)
@@ -59,7 +59,7 @@ int Input::getPulseData(bool filtered) {
 
 int Input::getECGData(bool filtered) {
 
-    reading = analogRead(1);
+    reading = analogRead(A1);
     filterOneLowpass.input(reading); 
 
     if (filtered)
@@ -70,7 +70,7 @@ int Input::getECGData(bool filtered) {
 
 int Input::getEMGData(bool filtered) {
 
-    reading = analogRead(2);
+    reading = analogRead(A2);
     filterOneLowpass.input(reading); 
 
     if (filtered)

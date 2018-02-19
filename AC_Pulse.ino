@@ -53,7 +53,7 @@ void pulseUpdate() {
     Serial.println(valueAverage); 
 
     // display graph of raw value
-    displayData(bioData, 30, 10);
+    displayData(bioData, 10, 0);
 
     // actual pusle calculation
     // 
@@ -118,4 +118,6 @@ void pulseUpdate() {
     // if 4th button is held down, exit display
     if (input.getButtonPress(4))
         changeAppMode(0);
+
+    delay(5);
 }
