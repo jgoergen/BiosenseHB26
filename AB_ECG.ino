@@ -30,8 +30,10 @@ void ECGUpdate() {
     // computer averages
     computeAverageValues(bioData);
 
-    // dump raw value to serial
-    Serial.println(bioData); 
+    Serial.print(bioData);
+    Serial.print(",");
+    Serial.print(valueAverage); 
+    Serial.println("|");
 
     // display graph of raw value
     displayData(bioData, 10, 0);
