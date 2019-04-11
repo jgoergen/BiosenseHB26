@@ -118,9 +118,9 @@ void changeAppMode(int mode) {
 void mainMenuStart() {
 
     oledDisplay.clear();
-    oledDisplay.print(10, 1, "3. EMG");   // align menu to labels on buttons
-    oledDisplay.print(10, 20, "4. ECG/EEG");
-    oledDisplay.print(10, 40, "5. PULSE");
+    oledDisplay.print(10, 1, "1. EMG");   // align menu to labels on buttons
+    oledDisplay.print(10, 20, "2. ECG/EEG");
+    oledDisplay.print(10, 40, "3. PULSE");
 
     buzzer.beep(200,600);
     buzzer.beep(300,200);

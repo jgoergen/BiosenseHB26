@@ -27,6 +27,17 @@ void ECGUpdate() {
     // get data ( don't filter it )
     int bioData = input.getECGData(false); 
 
+    Serial.print(highestValueAverage);
+    Serial.print(",");
+    Serial.print(lowestValueAverage);
+    Serial.print(",");
+    Serial.print(topLimit);
+    Serial.print(",");
+    Serial.print(bottomLimit);
+    Serial.print(",");
+    Serial.print(bioData);
+    Serial.print(",");
+
     // computer averages
     computeAverageValues(bioData);
 

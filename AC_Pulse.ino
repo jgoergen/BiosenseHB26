@@ -36,7 +36,7 @@ void pulseUpdate() {
     // computer averages
     computeAverageValues(bioData);
 
-    /* exhaustive debug readout for tuning
+    /* exhaustive debug readout for tuning 
     Serial.print(highestValueAverage);
     Serial.print(",");
     Serial.print(lowestValueAverage);
@@ -48,6 +48,7 @@ void pulseUpdate() {
     Serial.print(bioData);
     Serial.print(",");
     */
+    
 
     // dump average value to serial
     Serial.println(valueAverage); 
