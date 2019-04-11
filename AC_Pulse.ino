@@ -50,8 +50,11 @@ void pulseUpdate() {
     */
     
 
-    // dump average value to serial
-    Serial.println(valueAverage); 
+    // dump values to serial
+    // Serial.print(bioData);
+    // Serial.print(",");
+    // Serial.print(valueAverage); 
+    // Serial.println("|");
 
     // display graph of raw value
     displayData(bioData, 10, 0);
@@ -120,5 +123,5 @@ void pulseUpdate() {
     if (input.getButtonPress(4))
         changeAppMode(0);
 
-    delay(5);
+    delay(20);
 }
